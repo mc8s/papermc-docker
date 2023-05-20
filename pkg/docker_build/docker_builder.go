@@ -52,7 +52,11 @@ func (i ImageBuilder) BuildVersions(project string, versions []string) error {
 }
 
 func (i ImageBuilder) BuildDockerImage(project string, version string, build string) error {
-	err := i.downloadServerJAR(project, version, build)
+	err := i.deleteServerJAR()
+	if err != nil {
+		return err
+	}
+	err = i.downloadServerJAR(project, version, build)
 	if err != nil {
 		return err
 	}
@@ -72,6 +76,14 @@ func (i ImageBuilder) downloadServerJAR(project string, version string, build st
 	}
 
 	err = os.Rename(filename, serverJarName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (i ImageBuilder) deleteServerJAR() error {
+	err := os.Remove(serverJarName)
 	if err != nil {
 		return err
 	}
