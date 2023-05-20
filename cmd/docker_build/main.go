@@ -4,11 +4,26 @@ import (
 	"fmt"
 	"github.com/jonas-be/papermcdl/pkg/paper_api"
 	"os"
+	"papermc-docker/internal/docker_hub"
 )
 
 const serverJarName = "server.jar"
 
 func main() {
+	printTags()
+}
+
+func printTags() {
+	allTags := docker_hub.GetTags("library/alpine")
+	for _, image := range allTags {
+		fmt.Printf("Name: %s\n", image.Name)
+		fmt.Printf("Last Updated: %s\n\n", image.LastUpdated)
+	}
+	fmt.Println(allTags)
+	fmt.Println(len(allTags))
+}
+
+func buildAllVersions() {
 	api := paper_api.PapermcAPI{URL: "https://papermc.io"}
 
 	projects, err := api.GetProjects()
