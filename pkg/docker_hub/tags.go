@@ -8,19 +8,30 @@ import (
 	"net/http"
 )
 
-type DockerImage struct {
+type DockerImageTag struct {
 	LastUpdated string `json:"last_updated"`
 	Name        string `json:"name"`
 }
 
 type APIResponse struct {
-	Count    int           `json:"count"`
-	Next     string        `json:"next"`
-	Previous string        `json:"previous"`
-	Results  []DockerImage `json:"results"`
+	Count    int              `json:"count"`
+	Next     string           `json:"next"`
+	Previous string           `json:"previous"`
+	Results  []DockerImageTag `json:"results"`
 }
 
-func GetTags(imageName string) (allTags []DockerImage) {
+type TagList []DockerImageTag
+
+func (t TagList) GetTagLastUpdate(tag string) string {
+	for _, result := range t {
+		if result.Name == tag {
+			return result.LastUpdated
+		}
+	}
+	return ""
+}
+
+func GetTags(imageName string) (allTags TagList) {
 	baseURL := fmt.Sprintf("https://hub.docker.com/v2/repositories/%s/tags/", imageName)
 	for baseURL != "" {
 		resp, err := http.Get(baseURL)
