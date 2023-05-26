@@ -3,7 +3,10 @@ package docker_build
 import (
 	"fmt"
 	"github.com/jonas-be/papermcdl/pkg/paper_api"
+	"log"
 	"os"
+	"os/exec"
+	"strings"
 )
 
 const serverJarName = "server.jar"
@@ -29,6 +32,18 @@ func (i ImageBuilder) BuildAllProjects() error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (i ImageBuilder) BuildAllVersions(project string) error {
+	versions, err := i.Api.GetVersions(project)
+	if err != nil {
+		return err
+	}
+	err = i.BuildVersions(project, versions.Versions)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -60,8 +75,23 @@ func (i ImageBuilder) BuildDockerImage(project string, version string, build str
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Docker build -t mc8s/%s:%s-%s .\n", project, version, build)
+	dockerBuildCommand := fmt.Sprintf("docker build -t mc8s/%s:%s .", project, version)
+	executeCommand(dockerBuildCommand)
 	return nil
+}
+
+func executeCommand(command string) {
+	fmt.Printf("[%s]: ", command)
+	arr := strings.Split(command, " ")
+	cmd := exec.Command(arr[0], arr[1:]...)
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Print(string(output))
+	fmt.Println("| Done")
 }
 
 func (i ImageBuilder) downloadServerJAR(project string, version string, build string) error {

@@ -13,7 +13,7 @@ func main() {
 
 	printTags()
 
-	err := builder.BuildAllProjects()
+	err := builder.BuildAllVersions("paper")
 	if err != nil {
 		return
 	}
