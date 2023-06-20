@@ -6,13 +6,15 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"papermc-docker/pkg/last_builds"
 	"strings"
 )
 
 const serverJarName = "server.jar"
 
 type ImageBuilder struct {
-	Api paper_api.PapermcAPI
+	Api        paper_api.PapermcAPI
+	LastBuilds *last_builds.LastBuilds
 }
 
 func (i ImageBuilder) BuildAllProjects() error {
@@ -58,6 +60,11 @@ func (i ImageBuilder) BuildVersions(project string, versions []string) error {
 		if err != nil {
 			return err
 		}
+		lastBuild := i.LastBuilds.GetLastBuild(project, version)
+		if lastBuild == latestBuild {
+			fmt.Printf("Skipping %s:%s because it is already up to date (Last: %v == Latest: %v)\n", project, version, lastBuild, latestBuild)
+			continue
+		}
 		err = i.BuildDockerImage(project, version, latestBuild)
 		if err != nil {
 			return err
@@ -76,7 +83,9 @@ func (i ImageBuilder) BuildDockerImage(project string, version string, build str
 		return err
 	}
 	dockerBuildCommand := fmt.Sprintf("docker build -t mc8s/%s:%s .", project, version)
+	fmt.Println(dockerBuildCommand)
 	executeCommand(dockerBuildCommand)
+	i.LastBuilds.AddLastBuild(project, version, build)
 	return nil
 }
 
@@ -114,7 +123,7 @@ func (i ImageBuilder) downloadServerJAR(project string, version string, build st
 
 func (i ImageBuilder) deleteServerJAR() error {
 	err := os.Remove(serverJarName)
-	if err != nil {
+	if err != nil && err.Error() != "remove server.jar: The system cannot find the file specified." {
 		return err
 	}
 	return nil

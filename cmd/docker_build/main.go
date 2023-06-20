@@ -4,27 +4,32 @@ import (
 	"fmt"
 	"github.com/jonas-be/papermcdl/pkg/paper_api"
 	"papermc-docker/pkg/docker_build"
-	"papermc-docker/pkg/docker_hub"
+	"papermc-docker/pkg/last_builds"
 )
 
 func main() {
 	api := paper_api.PapermcAPI{URL: "https://papermc.io"}
-	builder := docker_build.ImageBuilder{Api: api}
-
-	printTags()
-
-	err := builder.BuildAllVersions("paper")
+	parser := last_builds.JSONParser{FilePath: "last_builds.json"}
+	err := parser.EnsureExists()
 	if err != nil {
+		fmt.Println("Error ensuring file exists: ", err)
 		return
 	}
-}
-
-func printTags() {
-	allTags := docker_hub.GetTags("jonasbe25/my-portfolio")
-	for _, image := range allTags {
-		fmt.Printf("Name: %s\n", image.Name)
-		fmt.Printf("Last Updated: %s\n\n", image.LastUpdated)
+	lastBuilds, err := parser.GetLastBuilds()
+	if err != nil {
+		fmt.Println("Error getting last builds: ", err)
+		return
 	}
-	fmt.Println(allTags)
-	fmt.Println(len(allTags))
+	builder := docker_build.ImageBuilder{Api: api, LastBuilds: &lastBuilds}
+
+	err = builder.BuildAllVersions("paper")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = parser.SaveLastBuilds(*builder.LastBuilds)
+	if err != nil {
+		fmt.Println("Error saving last builds: ", err)
+		return
+	}
 }
