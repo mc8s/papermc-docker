@@ -2,6 +2,7 @@ package last_builds
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 )
 
@@ -19,7 +20,7 @@ func (j JSONParser) EnsureExists() error {
 		defer file.Close()
 		err = j.SaveLastBuilds(LastBuilds{})
 	}
-	if err != nil && err.Error() != "CreateFile last-builds.json: The system cannot find the file specified." {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	return nil

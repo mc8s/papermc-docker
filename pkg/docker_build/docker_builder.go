@@ -1,6 +1,7 @@
 package docker_build
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jonas-be/papermcdl/pkg/paper_api"
 	"log"
@@ -123,7 +124,7 @@ func (i ImageBuilder) downloadServerJAR(project string, version string, build st
 
 func (i ImageBuilder) deleteServerJAR() error {
 	err := os.Remove(serverJarName)
-	if err != nil && err.Error() != "remove server.jar: The system cannot find the file specified." {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	return nil
