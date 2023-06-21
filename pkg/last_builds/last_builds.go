@@ -3,7 +3,7 @@ package last_builds
 import "time"
 
 type LastBuilds struct {
-	LastBuilds []LastBuild `json:"last_builds"`
+	LastBuilds []LastBuild `json:"last-builds"`
 }
 
 type LastBuild struct {

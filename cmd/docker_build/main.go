@@ -9,7 +9,7 @@ import (
 
 func main() {
 	api := paper_api.PapermcAPI{URL: "https://papermc.io"}
-	parser := last_builds.JSONParser{FilePath: "last_builds.json"}
+	parser := last_builds.JSONParser{FilePath: "last-builds.json"}
 	err := parser.EnsureExists()
 	if err != nil {
 		fmt.Println("Error ensuring file exists: ", err)
