@@ -38,6 +38,6 @@ jobs:
 
       - name: Commit and push last-build.json
         run: |
-          git add last-build.json
-          git commit -m "Update last-build.json"
+          git add last-builds.json
+          git commit -m "Update last-builds.json"
           git push
