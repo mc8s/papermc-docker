@@ -1,0 +1,43 @@
+name: build and push paper docker images
+
+on:
+  push:
+    branches: [ "**" ]
+
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: pipeline
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.20
+
+      - name: docker login
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+
+      - name: Run papermc-docker
+        run: |
+          go run cmd/docker_build/main.go --project paper
+
+      - name: Push docker images
+        run: |
+          docker push mc8s/paper -a
+
+      - name: Commit and push last-build.json
+        run: |
+          git add last-build.json
+          git commit -m "Update last-build.json"
+          git push
