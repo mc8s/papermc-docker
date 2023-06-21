@@ -1,5 +1,5 @@
 FROM amazoncorretto:17-alpine-jdk
-LABEL authors="Jonas-be"
+LABEL authors="Mc8s"
 
 WORKDIR /app
 
