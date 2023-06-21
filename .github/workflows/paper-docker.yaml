@@ -38,6 +38,8 @@ jobs:
 
       - name: Commit and push last-build.json
         run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add last-builds.json
           git commit -m "Update last-builds.json"
           git push
