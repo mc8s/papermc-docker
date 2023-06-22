@@ -41,7 +41,7 @@ jobs:
           LOCAL_IMAGE=$(docker images "$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           if [[ "$LATEST_IMAGE" != "$LOCAL_IMAGE" ]]; then \
             echo "New image found. Pushing..."; \
-           docker push "$REPOSITORY/$IMAGE_NAME"; \
+           docker push "$REPOSITORY/$IMAGE_NAME" -a; \
           else \
            echo "No new image found. Skipping push."; \
           fi
