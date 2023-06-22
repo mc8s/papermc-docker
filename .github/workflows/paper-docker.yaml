@@ -1,0 +1,59 @@
+name: build and push paper docker images
+
+on:
+  schedule:
+    - cron: '50 * * * *'
+
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.TOKEN }}
+          ref: pipeline
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20'
+
+      - name: docker login
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+
+      - name: Run papermc-docker
+        run: |
+          go run cmd/docker_build/main.go --project paper
+
+      - name: Push docker images
+        run: |
+          REPOSITORY="mc8s"; \
+          IMAGE_NAME="paper"; \
+          LATEST_IMAGE=$(docker images "$REPOSITORY/$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
+          LOCAL_IMAGE=$(docker images "$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
+          if [[ "$LATEST_IMAGE" != "$LOCAL_IMAGE" ]]; then \
+            echo "New image found. Pushing..."; \
+           docker push "$REPOSITORY/$IMAGE_NAME" -a; \
+          else \
+           echo "No new image found. Skipping push."; \
+          fi
+
+      - name: Commit and push last-build.json
+        run: |
+          git config --global user.name 'Mc8s Mate'
+          git config --global user.email 'mc8s-mate@users.noreply.github.com'
+          if [[ -n $(git status --porcelain last-builds.json) ]]; then \
+            git add last-builds.json && \
+            git commit -m "Update last-builds.json" && \
+            git push; \
+          else \
+            echo "No changes in last-builds.json. Skipping commit and push."; \
+          fi
