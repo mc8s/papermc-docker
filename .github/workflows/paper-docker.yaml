@@ -40,16 +40,20 @@ jobs:
           LATEST_IMAGE=$(docker images "$REPOSITORY/$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           LOCAL_IMAGE=$(docker images "$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           if [[ "$LATEST_IMAGE" != "$LOCAL_IMAGE" ]]; then \
-          echo "New image found. Pushing..."; \
-          docker push "$REPOSITORY/$IMAGE_NAME"; \
+            echo "New image found. Pushing..."; \
+           docker push "$REPOSITORY/$IMAGE_NAME"; \
           else \
-          echo "No new image found. Skipping push."; \
+           echo "No new image found. Skipping push."; \
           fi
 
       - name: Commit and push last-build.json
         run: |
           git config --global user.name 'Mc8s Mate'
           git config --global user.email 'mc8s-mate@users.noreply.github.com'
-          git add last-builds.json
-          git commit -m "Update last-builds.json"
-          git push
+          if [[ -n $(git status --porcelain last-builds.json) ]]; then \
+            git add last-builds.json && \
+            git commit -m "Update last-builds.json" && \
+            git push; \
+          else \
+            echo "No changes in last-builds.json. Skipping commit and push."; \
+          fi
