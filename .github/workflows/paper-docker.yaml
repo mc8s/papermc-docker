@@ -35,7 +35,16 @@ jobs:
 
       - name: Push docker images
         run: |
-          docker push mc8s/paper -a
+          REPOSITORY="mc8s"; \
+          IMAGE_NAME="paper"; \
+          LATEST_IMAGE=$(docker images "$REPOSITORY/$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
+          LOCAL_IMAGE=$(docker images "$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
+          if [[ "$LATEST_IMAGE" != "$LOCAL_IMAGE" ]]; then \
+          echo "New image found. Pushing..."; \
+          docker push "$REPOSITORY/$IMAGE_NAME"; \
+          else \
+          echo "No new image found. Skipping push."; \
+          fi
 
       - name: Commit and push last-build.json
         run: |
