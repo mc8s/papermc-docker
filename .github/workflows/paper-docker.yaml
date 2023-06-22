@@ -1,8 +1,8 @@
 name: build and push paper docker images
 
 on:
-  push:
-    branches: [ "**" ]
+  schedule:
+    - cron: '50 * * * *'
 
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
