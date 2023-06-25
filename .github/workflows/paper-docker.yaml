@@ -1,11 +1,8 @@
 name: Paper docker images
 
 on:
-  push:
-    branches: [ '**' ]
-
-#  schedule:
-#    - cron: '50 * * * *'
+  schedule:
+    - cron: '50 * * * *'
 
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
@@ -15,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        project: [ paper, velocity, folia, waterfall ]
+        project: [ paper, travertine, waterfall, velocity, folia ]
 
     steps:
       - uses: actions/checkout@v3
