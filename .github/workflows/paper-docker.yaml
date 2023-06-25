@@ -58,6 +58,7 @@ jobs:
           git config --global user.name 'Mc8s Mate'
           git config --global user.email 'mc8s-mate@users.noreply.github.com'
           PROJECT=${{ matrix.project }}; \
+          git pull; \
           if [[ -n $(git status --porcelain last-builds-$PROJECT.json) ]]; then \
             git add last-builds-$PROJECT.json && \
             git commit -m "Update last-builds-$PROJECT.json" && \
