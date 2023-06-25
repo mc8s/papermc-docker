@@ -1,14 +1,21 @@
-name: build and push paper docker images
+name: Paper docker images
 
 on:
-  schedule:
-    - cron: '50 * * * *'
+  push:
+    branches: [ '**' ]
+
+#  schedule:
+#    - cron: '50 * * * *'
 
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project: [ paper, velocity, folia, waterfall ]
 
     steps:
       - uses: actions/checkout@v3
@@ -31,12 +38,12 @@ jobs:
 
       - name: Run papermc-docker
         run: |
-          go run cmd/docker_build/main.go --project paper
+          go run cmd/docker_build/main.go --project  ${{ matrix.project }}
 
       - name: Push docker images
         run: |
           REPOSITORY="mc8s"; \
-          IMAGE_NAME="paper"; \
+          IMAGE_NAME=${{ matrix.project }}; \
           LATEST_IMAGE=$(docker images "$REPOSITORY/$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           LOCAL_IMAGE=$(docker images "$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           if [[ "$LATEST_IMAGE" != "$LOCAL_IMAGE" ]]; then \
