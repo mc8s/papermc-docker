@@ -53,14 +53,15 @@ jobs:
            echo "No new image found. Skipping push."; \
           fi
 
-      - name: Commit and push last-build.json
+      - name: Commit and push last-build-X.json
         run: |
           git config --global user.name 'Mc8s Mate'
           git config --global user.email 'mc8s-mate@users.noreply.github.com'
-          if [[ -n $(git status --porcelain last-builds.json) ]]; then \
-            git add last-builds.json && \
-            git commit -m "Update last-builds.json" && \
+          PROJECT=${{ matrix.project }}; \
+          if [[ -n $(git status --porcelain last-builds-$PROJECT.json) ]]; then \
+            git add last-builds-$PROJECT.json && \
+            git commit -m "Update last-builds-$PROJECT.json" && \
             git push; \
           else \
-            echo "No changes in last-builds.json. Skipping commit and push."; \
+            echo "No changes in last-builds-$PROJECT.json. Skipping commit and push."; \
           fi
