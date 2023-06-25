@@ -28,7 +28,7 @@ func main() {
 		}
 	}
 
-	parser := last_builds.JSONParser{FilePath: "last-builds.json"}
+	parser := last_builds.JSONParser{FilePath: fmt.Sprintf("last-builds-%v.json", project)}
 	err := parser.EnsureExists()
 	if err != nil {
 		fmt.Println("Error ensuring file exists: ", err)
