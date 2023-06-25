@@ -1,4 +1,4 @@
-name: build and push paper docker images
+name: Paper docker images
 
 on:
   schedule:
@@ -9,6 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project: [ paper, travertine, waterfall, velocity, folia ]
 
     steps:
       - uses: actions/checkout@v3
@@ -31,12 +35,12 @@ jobs:
 
       - name: Run papermc-docker
         run: |
-          go run cmd/docker_build/main.go --project paper
+          go run cmd/docker_build/main.go --project  ${{ matrix.project }}
 
       - name: Push docker images
         run: |
           REPOSITORY="mc8s"; \
-          IMAGE_NAME="paper"; \
+          IMAGE_NAME=${{ matrix.project }}; \
           LATEST_IMAGE=$(docker images "$REPOSITORY/$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           LOCAL_IMAGE=$(docker images "$IMAGE_NAME" --format "{{.ID}}" | head -n 1); \
           if [[ "$LATEST_IMAGE" != "$LOCAL_IMAGE" ]]; then \
@@ -46,14 +50,16 @@ jobs:
            echo "No new image found. Skipping push."; \
           fi
 
-      - name: Commit and push last-build.json
+      - name: Commit and push last-build-X.json
         run: |
           git config --global user.name 'Mc8s Mate'
           git config --global user.email 'mc8s-mate@users.noreply.github.com'
-          if [[ -n $(git status --porcelain last-builds.json) ]]; then \
-            git add last-builds.json && \
-            git commit -m "Update last-builds.json" && \
+          PROJECT=${{ matrix.project }}; \
+          git pull; \
+          if [[ -n $(git status --porcelain last-builds-$PROJECT.json) ]]; then \
+            git add last-builds-$PROJECT.json && \
+            git commit -m "Update last-builds-$PROJECT.json" && \
             git push; \
           else \
-            echo "No changes in last-builds.json. Skipping commit and push."; \
+            echo "No changes in last-builds-$PROJECT.json. Skipping commit and push."; \
           fi
