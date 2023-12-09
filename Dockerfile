@@ -3,7 +3,8 @@ LABEL authors="Mc8s"
 
 WORKDIR /app
 
-COPY server.jar /app/
-COPY eula.txt /app/
+COPY server.jar /preset/
+COPY eula.txt /preset/
+COPY start.sh /exec/
 
-ENTRYPOINT ["java", "-jar", "server.jar"]
+ENTRYPOINT ["/exec/start.sh"]
